@@ -19,8 +19,7 @@
         "forum": "https://discuss.flarum.org/"
     },
     "replace": {
-        "afrux/top-posters-widget": "*",
-        "ianm/top-posters-widget": "*"
+        "afrux/top-posters-widget": "*"
     },
     "require": {
         "flarum/core": "^1.8.0",

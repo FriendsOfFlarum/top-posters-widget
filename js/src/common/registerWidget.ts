@@ -1,9 +1,9 @@
-import Application from 'flarum/common/Application';
+import app from 'flarum/common/app';
 import Widgets from 'flarum/extensions/fof-forum-widgets-core/common/extend/Widgets';
 
 import TopPostersWidget from './components/TopPostersWidget';
 
-export default function (app: Application) {
+export default function () {
   new Widgets()
     .add({
       key: 'topPosters',

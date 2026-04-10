@@ -3,12 +3,15 @@ import type Mithril from 'mithril';
 import LoadingIndicator from 'flarum/common/components/LoadingIndicator';
 import avatar from 'flarum/common/helpers/avatar';
 import icon from 'flarum/common/helpers/icon';
-import Widget from 'flarum/extensions/fof-forum-widgets-core/common/components/Widget';
+import Widget, { WidgetAttrs } from 'flarum/extensions/fof-forum-widgets-core/common/components/Widget';
 import type User from 'flarum/common/models/User';
 import Link from 'flarum/common/components/Link';
+import extractText from 'flarum/common/utils/extractText';
+import type { ApiResponsePlural } from 'flarum/common/Store';
 
-export default class TopPostersWidget extends Widget {
-  private monthlyCounts!: any;
+export default class TopPostersWidget extends Widget<WidgetAttrs> {
+  private monthlyCounts!: Record<string, number>;
+  protected loadWithInitialResponse!: boolean;
 
   oninit(vnode: Mithril.Vnode): void {
     super.oninit(vnode);
@@ -24,7 +27,7 @@ export default class TopPostersWidget extends Widget {
     super.oncreate(vnode);
 
     if (!this.attrs.state.hasLoaded) {
-      setTimeout(this.load.bind(this), this.loadWithInitialResponse ? 0 : 800);
+      this.load();
     }
   }
 
@@ -37,7 +40,7 @@ export default class TopPostersWidget extends Widget {
   }
 
   title(): string {
-    return app.translator.trans('fof-top-posters-widget.forum.widget.title');
+    return extractText(app.translator.trans('fof-top-posters-widget.forum.widget.title'));
   }
 
   description(): string {
@@ -49,7 +52,7 @@ export default class TopPostersWidget extends Widget {
       return <LoadingIndicator />;
     }
 
-    const users = this.attrs.state.users.sort((a: User, b: User) => this.monthlyCounts[b.id()] - this.monthlyCounts[a.id()]);
+    const users = (this.attrs.state.users as User[]).sort((a: User, b: User) => this.monthlyCounts[b.id()!] - this.monthlyCounts[a.id()!]);
 
     return (
       <div className="FoF-TopPostersWidget-users">
@@ -59,7 +62,7 @@ export default class TopPostersWidget extends Widget {
             <div className="FoF-TopPostersWidget-users-item-content">
               <div className="FoF-TopPostersWidget-users-item-name">{user.displayName()}</div>
               <div className="FoF-TopPostersWidget-users-item-value">
-                {icon('fas fa-comment-dots')} {this.monthlyCounts[user.id()]}
+                {icon('fas fa-comment-dots')} {this.monthlyCounts[user.id()!]}
               </div>
             </div>
           </Link>
@@ -70,19 +73,19 @@ export default class TopPostersWidget extends Widget {
 
   load(): void {
     if (this.loadWithInitialResponse) {
-      this.setResults(app.forum.topPosters());
+      this.setResults((app.forum as any).topPosters() as User[]);
 
       return;
     }
 
     this.attrs.state.isLoading = true;
 
-    app.store.find('users', { filter: { top_poster: true } }).then((users: User[]) => {
+    (app.store.find<User[]>('users', { filter: { top_poster: 'true' } }) as Promise<ApiResponsePlural<User>>).then((users) => {
       this.setResults(users);
     });
   }
 
-  setResults(users) {
+  setResults(users: User[]): void {
     this.attrs.state.users = users;
     this.attrs.state.isLoading = false;
     this.attrs.state.hasLoaded = true;

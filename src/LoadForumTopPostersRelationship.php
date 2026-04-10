@@ -11,7 +11,6 @@
 
 namespace FoF\TopPosters;
 
-use FoF\ForumWidgets\SafeCacheRepositoryAdapter;
 use Flarum\Api\Controller\ShowForumController;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\Http\RequestUtil;
@@ -20,30 +19,12 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class LoadForumTopPostersRelationship
 {
-    /**
-     * @var SettingsRepositoryInterface
-     */
-    protected $settings;
+    public function __construct(
+        protected SettingsRepositoryInterface $settings,
+        protected UserRepository $repository
+    ) {}
 
-    /**
-     * @var SafeCacheRepositoryAdapter
-     */
-    private $cache;
-
-    /**
-     *
-     * @var UserRepository
-     */
-    protected $repository;
-
-    public function __construct(SettingsRepositoryInterface $settings, SafeCacheRepositoryAdapter $cache, UserRepository $repository)
-    {
-        $this->settings = $settings;
-        $this->cache = $cache;
-        $this->repository = $repository;
-    }
-
-    public function __invoke(ShowForumController $controller, &$data, ServerRequestInterface $request)
+    public function __invoke(ShowForumController $controller, &$data, ServerRequestInterface $request): void
     {
         $loadWithInitialResponse = $this->settings->get('fof-forum-widgets-core.prefer_data_with_initial_load', false);
 
@@ -55,11 +36,9 @@ class LoadForumTopPostersRelationship
         $actor = RequestUtil::getActor($request);
         $counts = $this->repository->getTopPosters();
 
-        $data['topPosters'] = $this->cache->remember('fof-top-posters-widget.top_poster_users', 2400, function () use ($actor, $counts) {
-            return User::query()
-                ->whereVisibleTo($actor)
-                ->whereIn('id', array_keys($counts))
-                ->get();
-        }) ?: [];
+        $data['topPosters'] = User::query()
+            ->whereVisibleTo($actor)
+            ->whereIn('id', array_keys($counts))
+            ->get();
     }
 }

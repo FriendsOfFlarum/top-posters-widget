@@ -15,9 +15,9 @@ use Flarum\Api\Serializer as FlarumSerializer;
 use Flarum\Api\Controller\ShowForumController;
 use Flarum\Extend;
 use Flarum\Settings\Event\Saved;
+use Flarum\User\Event\Saving as UserSaving;
 use Flarum\User\Filter\UserFilterer;
 use Flarum\User\Search\UserSearcher;
-use Flarum\User\User;
 
 return [
     (new Extend\Frontend('forum'))
@@ -48,5 +48,6 @@ return [
         ->default('fof-top-posters-widget.excludeGroups', '[]'),
 
     (new Extend\Event())
-        ->listen(Saved::class, Listener\ClearTopPosterCacheOnSettingsChange::class),
+        ->listen(Saved::class, Listener\ClearTopPosterCacheOnSettingsChange::class)
+        ->listen(UserSaving::class, Listener\ClearTopPosterCacheOnSuspension::class),
 ];

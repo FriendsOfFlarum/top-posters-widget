@@ -13,54 +13,59 @@ namespace FoF\TopPosters;
 
 use FoF\ForumWidgets\SafeCacheRepositoryAdapter;
 use Carbon\Carbon;
+use Flarum\Extension\ExtensionManager;
 use Flarum\Post\CommentPost;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Illuminate\Contracts\Cache\Repository as IlluminateCache;
 
 class UserRepository
 {
-    static $cacheKey = 'fof-top-posters-widget.top_poster_counts';
-    
-    /**
-     * @var SafeCacheRepositoryAdapter
-     */
-    private $cache;
+    private const CACHE_KEY = 'fof-top-posters-widget.top_poster_counts';
 
-    /**
-     * @var SettingsRepositoryInterface
-     */
-    protected $settings;
+    private ?array $memo = null;
 
-    /**
-     * @var IlluminateCache
-     */
-    protected $illuminateCache;
-
-    public function __construct(SafeCacheRepositoryAdapter $cache, SettingsRepositoryInterface $settings, IlluminateCache $illuminateCache)
-    {
-        $this->cache = $cache;
-        $this->settings = $settings;
-        $this->illuminateCache = $illuminateCache;
-    }
+    public function __construct(
+        private SafeCacheRepositoryAdapter $cache,
+        private SettingsRepositoryInterface $settings,
+        private IlluminateCache $illuminateCache,
+        private ExtensionManager $extensions
+    ) {}
 
     public function getTopPosters(): array
     {
-        return $this->cache->remember(self::$cacheKey, 2400, function (): array {
-            $excludeGroups = $this->getexcludeGroups();
+        if ($this->memo !== null) {
+            return $this->memo;
+        }
 
-            return CommentPost::query()
+        return $this->memo = $this->cache->remember(self::CACHE_KEY, 43200, function (): array {
+            $excludeGroups = $this->getExcludeGroups();
+
+            $query = CommentPost::query()
                 ->selectRaw('user_id, count(id) as count')
                 ->where('created_at', '>', Carbon::now()->subMonth())
-                ->whereNotIn('user_id', function ($query) use ($excludeGroups) {
-                    $query->select('user_id')
-                        ->from('group_user')
-                        ->whereIn('group_id', $excludeGroups);
-                })
                 ->groupBy('user_id')
                 ->orderBy('count', 'desc')
                 ->limit(5)
-                ->toBase()
-                ->get()
+                ->toBase();
+
+            if (!empty($excludeGroups)) {
+                $query->whereNotIn('user_id', function ($q) use ($excludeGroups) {
+                    $q->select('user_id')
+                        ->from('group_user')
+                        ->whereIn('group_id', $excludeGroups);
+                });
+            }
+
+            if ($this->extensions->isEnabled('flarum-suspend')) {
+                $query->whereNotIn('user_id', function ($q) {
+                    $q->select('id')
+                        ->from('users')
+                        ->where('suspended_until', '>', Carbon::now());
+                });
+            }
+
+            return $query->get()
+                ->sortByDesc('count')
                 ->mapWithKeys(function (\stdClass $post) {
                     return [$post->user_id => (int) $post->count];
                 })
@@ -68,13 +73,15 @@ class UserRepository
         }) ?: [];
     }
 
-    protected function getexcludeGroups(): array
+    private function getExcludeGroups(): array
     {
-        return array_map('intval', json_decode($this->settings->get('fof-top-posters-widget.excludeGroups'), true));
+        return array_map('intval', json_decode($this->settings->get('fof-top-posters-widget.excludeGroups'), true) ?? []);
     }
 
     public function clearTopPosterCache(): bool
     {
-        return $this->illuminateCache->forget(self::$cacheKey);
+        $this->memo = null;
+
+        return $this->illuminateCache->forget(self::CACHE_KEY);
     }
 }

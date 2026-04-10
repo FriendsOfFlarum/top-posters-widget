@@ -12,46 +12,27 @@
 namespace FoF\TopPosters\Query;
 
 use FoF\TopPosters\UserRepository;
-use Carbon\Carbon;
 use Flarum\Filter\FilterInterface;
 use Flarum\Filter\FilterState;
 use Flarum\Search\AbstractRegexGambit;
 use Flarum\Search\SearchState;
-use Flarum\User\User;
 use Illuminate\Database\Query\Builder;
 
 class TopPosterGambitFilter extends AbstractRegexGambit implements FilterInterface
 {
-    /**
-     * @var UserRepository
-     */
-    private $repository;
+    public function __construct(private UserRepository $repository) {}
 
-    public function __construct(UserRepository $repository)
-    {
-        $this->repository = $repository;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function apply(SearchState $search, $bit)
+    public function apply(SearchState $search, $bit): bool
     {
         return parent::apply($search, $bit);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getGambitPattern()
+    public function getGambitPattern(): string
     {
         return 'is:top_poster';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function conditions(SearchState $search, array $matches, $negate)
+    protected function conditions(SearchState $search, array $matches, $negate): void
     {
         $this->constrain($search->getQuery(), $negate);
     }
@@ -61,15 +42,19 @@ class TopPosterGambitFilter extends AbstractRegexGambit implements FilterInterfa
         return 'top_poster';
     }
 
-    public function filter(FilterState $filterState, string $filterValue, bool $negate)
+    public function filter(FilterState $filterState, string $filterValue, bool $negate): void
     {
         $this->constrain($filterState->getQuery(), $negate);
     }
 
-    protected function constrain(Builder $query, ?bool $negate = false)
+    protected function constrain(Builder $query, bool $negate = false): void
     {
         $ids = array_keys($this->repository->getTopPosters());
 
-        $query->whereIn('id', $ids);
+        if ($negate) {
+            $query->whereNotIn('id', $ids);
+        } else {
+            $query->whereIn('id', $ids);
+        }
     }
 }

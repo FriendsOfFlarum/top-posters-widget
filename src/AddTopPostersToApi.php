@@ -15,17 +15,9 @@ use function FoF\ForumWidgets\Helper\pretty_number_format;
 
 class AddTopPostersToApi
 {
-    /**
-     * @var UserRepository
-     */
-    private $repository;
+    public function __construct(private UserRepository $repository) {}
 
-    public function __construct(UserRepository $repository)
-    {
-        $this->repository = $repository;
-    }
-
-    public function __invoke()
+    public function __invoke(): array
     {
         $data = $this->repository->getTopPosters();
 

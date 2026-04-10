@@ -8,17 +8,9 @@ use Illuminate\Support\Arr;
 
 class ClearTopPosterCacheOnSettingsChange
 {
-    /**
-     * @var UserRepository
-     */
-    private $repository;
-    
-    public function __construct(UserRepository $repository)
-    {
-        $this->repository = $repository;
-    }
-    
-    public function handle(Saved $event)
+    public function __construct(private UserRepository $repository) {}
+
+    public function handle(Saved $event): void
     {
         if (Arr::get($event->settings, 'fof-top-posters-widget.excludeGroups')) {
             $this->repository->clearTopPosterCache();
