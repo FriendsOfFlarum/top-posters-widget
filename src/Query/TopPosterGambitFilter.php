@@ -1,18 +1,17 @@
 <?php
 
 /*
- * This file is part of afrux/top-posters-widget.
+ * This file is part of fof/top-posters-widget.
  *
- * Copyright (c) 2021 Sami Mazouz.
+ * Copyright (c) 2021 FriendsOfFlarum.
  *
  * For the full copyright and license information, please view the LICENSE.md
  * file that was distributed with this source code.
  */
 
+namespace FoF\TopPosters\Query;
 
-namespace Afrux\TopPosters\Query;
-
-use Afrux\TopPosters\UserRepository;
+use FoF\TopPosters\UserRepository;
 use Carbon\Carbon;
 use Flarum\Filter\FilterInterface;
 use Flarum\Filter\FilterState;
@@ -54,7 +53,7 @@ class TopPosterGambitFilter extends AbstractRegexGambit implements FilterInterfa
      */
     protected function conditions(SearchState $search, array $matches, $negate)
     {
-        $this->constrain($search->getQuery(), $matches[1], $negate);
+        $this->constrain($search->getQuery(), $negate);
     }
 
     public function getFilterKey(): string

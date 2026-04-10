@@ -1,77 +1,76 @@
 {
-    "name": "ianm/top-posters-widget",
+    "name": "fof/top-posters-widget",
     "description": "Top Posters Widget",
     "keywords": [
         "flarum", "widget", "posters", "forum"
     ],
     "funding": [
         {
-            "type": "other",
-            "url": "https://www.buymeacoffee.com/sycho"
+            "type": "website",
+            "url": "https://opencollective.com/fof/donate"
         }
     ],
     "type": "flarum-extension",
     "license": "MIT",
-    "homepage": "https://afrux.github.io",
+    "homepage": "https://friendsofflarum.org",
     "support": {
-      "issues": "https://github.com/afrux/top-posters-widget/issues",
-      "source": "https://github.com/afrux/top-posters-widget",
-      "forum": "https://discuss.flarum.org/"
-    },
-    "require": {
-        "flarum/core": "^1.2.0",
-        "afrux/forum-widgets-core": "^0.1.7"
-    },
-    "require-dev": {
-        "flarum/testing": "^1.0.0"
+        "issues": "https://github.com/FriendsOfFlarum/top-posters-widget/issues",
+        "source": "https://github.com/FriendsOfFlarum/top-posters-widget",
+        "forum": "https://discuss.flarum.org/"
     },
     "replace": {
-        "afrux/top-posters-widget": "*"
+        "afrux/top-posters-widget": "*",
+        "ianm/top-posters-widget": "*"
+    },
+    "require": {
+        "flarum/core": "^1.8.0",
+        "fof/forum-widgets-core": "1.x-dev"
+    },
+    "require-dev": {
+        "flarum/phpstan": "*"
     },
     "authors": [
         {
-            "name": "Sami Mazouz",
-            "email": "sychocouldy@gmail.com",
-            "role": "Developer"
+            "name": "FriendsOfFlarum",
+            "homepage": "https://friendsofflarum.org"
         }
     ],
     "autoload": {
         "psr-4": {
-            "Afrux\\TopPosters\\": "src/"
+            "FoF\\TopPosters\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Afrux\\TopPosters\\Tests\\": "tests/"
+            "FoF\\TopPosters\\Tests\\": "tests/"
         }
     },
     "extra": {
         "branch-alias": {
-            "dev-main": "0.1.x-dev"
+            "dev-1.x": "1.x-dev"
         },
         "flarum-extension": {
-            "title": "Top Posters Widget",
+            "title": "FoF Top Posters Widget",
             "category": "forum-widget",
             "icon": {
                 "name": "fas fa-sort-numeric-down",
                 "backgroundColor": "#e34b6e",
                 "color": "#fff"
             }
+        },
+        "flarum-cli": {
+            "modules": {
+                "githubActions": true
+            }
         }
     },
     "scripts": {
-        "test": [
-            "@test:unit",
-            "@test:integration"
-        ],
-        "test:unit": "phpunit -c tests/phpunit.unit.xml",
-        "test:integration": "phpunit -c tests/phpunit.integration.xml",
-        "test:setup": "@php tests/integration/setup.php"
+        "analyse:phpstan": "phpstan analyse",
+        "clear-cache:phpstan": "phpstan clear-result-cache"
     },
     "scripts-descriptions": {
-        "test": "Runs all tests.",
-        "test:unit": "Runs all unit tests.",
-        "test:integration": "Runs all integration tests.",
-        "test:setup": "Sets up a database for use with integration tests. Execute this only once."
-    }
+        "analyse:phpstan": "Run static analysis"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }

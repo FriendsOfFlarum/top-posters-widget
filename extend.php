@@ -1,15 +1,15 @@
 <?php
 
 /*
- * This file is part of afrux/top-posters-widget.
+ * This file is part of fof/top-posters-widget.
  *
- * Copyright (c) 2021 Sami Mazouz.
+ * Copyright (c) 2021 FriendsOfFlarum.
  *
  * For the full copyright and license information, please view the LICENSE.md
  * file that was distributed with this source code.
  */
 
-namespace Afrux\TopPosters;
+namespace FoF\TopPosters;
 
 use Flarum\Api\Serializer as FlarumSerializer;
 use Flarum\Api\Controller\ShowForumController;
@@ -45,7 +45,7 @@ return [
         ->addGambit(Query\TopPosterGambitFilter::class),
 
     (new Extend\Settings())
-        ->default('afrux-top-posters-widget.excludeGroups', '[]'),
+        ->default('fof-top-posters-widget.excludeGroups', '[]'),
 
     (new Extend\Event())
         ->listen(Saved::class, Listener\ClearTopPosterCacheOnSettingsChange::class),

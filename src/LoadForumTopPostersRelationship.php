@@ -1,17 +1,17 @@
 <?php
 
 /*
- * This file is part of afrux/top-posters-widget.
+ * This file is part of fof/top-posters-widget.
  *
- * Copyright (c) 2021 Sami Mazouz.
+ * Copyright (c) 2021 FriendsOfFlarum.
  *
  * For the full copyright and license information, please view the LICENSE.md
  * file that was distributed with this source code.
  */
 
-namespace Afrux\TopPosters;
+namespace FoF\TopPosters;
 
-use Afrux\ForumWidgets\SafeCacheRepositoryAdapter;
+use FoF\ForumWidgets\SafeCacheRepositoryAdapter;
 use Flarum\Api\Controller\ShowForumController;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\Http\RequestUtil;
@@ -45,7 +45,7 @@ class LoadForumTopPostersRelationship
 
     public function __invoke(ShowForumController $controller, &$data, ServerRequestInterface $request)
     {
-        $loadWithInitialResponse = $this->settings->get('afrux-forum-widgets-core.prefer_data_with_initial_load', false);
+        $loadWithInitialResponse = $this->settings->get('fof-forum-widgets-core.prefer_data_with_initial_load', false);
 
         if (! $loadWithInitialResponse) {
             $data['topPosters'] = [];
@@ -55,7 +55,7 @@ class LoadForumTopPostersRelationship
         $actor = RequestUtil::getActor($request);
         $counts = $this->repository->getTopPosters();
 
-        $data['topPosters'] = $this->cache->remember('afrux-top-posters-widget.top_poster_users', 2400, function () use ($actor, $counts) {
+        $data['topPosters'] = $this->cache->remember('fof-top-posters-widget.top_poster_users', 2400, function () use ($actor, $counts) {
             return User::query()
                 ->whereVisibleTo($actor)
                 ->whereIn('id', array_keys($counts))

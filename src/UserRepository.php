@@ -1,17 +1,17 @@
 <?php
 
 /*
- * This file is part of afrux/top-posters-widget.
+ * This file is part of fof/top-posters-widget.
  *
- * Copyright (c) 2021 Sami Mazouz.
+ * Copyright (c) 2021 FriendsOfFlarum.
  *
  * For the full copyright and license information, please view the LICENSE.md
  * file that was distributed with this source code.
  */
 
-namespace Afrux\TopPosters;
+namespace FoF\TopPosters;
 
-use Afrux\ForumWidgets\SafeCacheRepositoryAdapter;
+use FoF\ForumWidgets\SafeCacheRepositoryAdapter;
 use Carbon\Carbon;
 use Flarum\Post\CommentPost;
 use Flarum\Settings\SettingsRepositoryInterface;
@@ -19,7 +19,7 @@ use Illuminate\Contracts\Cache\Repository as IlluminateCache;
 
 class UserRepository
 {
-    static $cacheKey = 'afrux-top-posters-widget.top_poster_counts';
+    static $cacheKey = 'fof-top-posters-widget.top_poster_counts';
     
     /**
      * @var SafeCacheRepositoryAdapter
@@ -59,8 +59,9 @@ class UserRepository
                 ->groupBy('user_id')
                 ->orderBy('count', 'desc')
                 ->limit(5)
+                ->toBase()
                 ->get()
-                ->mapWithKeys(function ($post) {
+                ->mapWithKeys(function (\stdClass $post) {
                     return [$post->user_id => (int) $post->count];
                 })
                 ->toArray();
@@ -69,7 +70,7 @@ class UserRepository
 
     protected function getexcludeGroups(): array
     {
-        return array_map('intval', json_decode($this->settings->get('afrux-top-posters-widget.excludeGroups'), true));
+        return array_map('intval', json_decode($this->settings->get('fof-top-posters-widget.excludeGroups'), true));
     }
 
     public function clearTopPosterCache(): bool

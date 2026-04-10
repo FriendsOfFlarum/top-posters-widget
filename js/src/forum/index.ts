@@ -4,8 +4,8 @@ import Forum from 'flarum/common/models/Forum';
 
 import registerWidget from '../common/registerWidget';
 
-app.initializers.add('ianm/top-posters-widget', () => {
-  User.prototype.prettyCommentCount = Model.attribute('afrux-top-posters-widget.prettyCommentCount');
+app.initializers.add('fof/top-posters-widget', () => {
+  User.prototype.prettyCommentCount = Model.attribute('fof-top-posters-widget.prettyCommentCount');
   Forum.prototype.topPosters = Model.hasMany('topPosters', User);
 
   registerWidget(app);

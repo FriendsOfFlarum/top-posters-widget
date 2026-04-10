@@ -9,7 +9,7 @@ export default class TopPostersSettingsPage extends ExtensionPage {
     super.oninit(vnode);
 
     // Initialize the selected groups with an empty array or the saved settings
-    this.selected = this.setting('afrux-top-posters-widget.excludeGroups', '[]');
+    this.selected = this.setting('fof-top-posters-widget.excludeGroups', '[]');
   }
 
   content() {
@@ -20,7 +20,7 @@ export default class TopPostersSettingsPage extends ExtensionPage {
       <div className="container">
         <div className="TopPostersSettingsPage">
           <div className="Form-group">
-            <h4>{app.translator.trans('afrux-top-posters-widget.admin.settings.info')}</h4>
+            <h4>{app.translator.trans('fof-top-posters-widget.admin.settings.info')}</h4>
 
             {app.store
               .all<Group>('groups')

@@ -1,8 +1,8 @@
 <?php
 
-namespace Afrux\TopPosters\Listener;
+namespace FoF\TopPosters\Listener;
 
-use Afrux\TopPosters\UserRepository;
+use FoF\TopPosters\UserRepository;
 use Flarum\Settings\Event\Saved;
 use Illuminate\Support\Arr;
 
@@ -20,7 +20,7 @@ class ClearTopPosterCacheOnSettingsChange
     
     public function handle(Saved $event)
     {
-        if (Arr::get($event->settings, 'afrux-top-posters-widget.excludeGroups')) {
+        if (Arr::get($event->settings, 'fof-top-posters-widget.excludeGroups')) {
             $this->repository->clearTopPosterCache();
         }
     }
