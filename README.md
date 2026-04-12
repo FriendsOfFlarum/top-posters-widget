@@ -28,4 +28,4 @@ php flarum cache:clear
 
 - [Packagist](https://packagist.org/packages/fof/top-posters-widget)
 - [GitHub](https://github.com/FriendsOfFlarum/top-posters-widget)
-- [Discuss](https://discuss.flarum.org/d/PUT_DISCUSS_SLUG_HERE)
+- [Discuss](https://discuss.flarum.org/d/39067)

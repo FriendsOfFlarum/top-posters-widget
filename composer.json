@@ -16,14 +16,14 @@
     "support": {
         "issues": "https://github.com/FriendsOfFlarum/top-posters-widget/issues",
         "source": "https://github.com/FriendsOfFlarum/top-posters-widget",
-        "forum": "https://discuss.flarum.org/"
+        "forum": "https://discuss.flarum.org/d/39067"
     },
     "replace": {
         "afrux/top-posters-widget": "*"
     },
     "require": {
         "flarum/core": "^1.8.0",
-        "fof/forum-widgets-core": "1.x-dev"
+        "fof/forum-widgets-core": "^1.0.0"
     },
     "require-dev": {
         "flarum/phpstan": "*"
@@ -53,7 +53,7 @@
             "category": "forum-widget",
             "icon": {
                 "name": "fas fa-sort-numeric-down",
-                "backgroundColor": "#e34b6e",
+                "backgroundColor": "#e74c3c",
                 "color": "#fff"
             }
         },
