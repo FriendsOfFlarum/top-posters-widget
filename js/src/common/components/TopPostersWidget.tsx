@@ -1,8 +1,8 @@
 import app from 'flarum/common/app';
 import type Mithril from 'mithril';
 import LoadingIndicator from 'flarum/common/components/LoadingIndicator';
-import avatar from 'flarum/common/helpers/avatar';
-import icon from 'flarum/common/helpers/icon';
+import Avatar from 'flarum/common/components/Avatar';
+import Icon from 'flarum/common/components/Icon';
 import Widget, { WidgetAttrs } from 'flarum/extensions/fof-forum-widgets-core/common/components/Widget';
 import type User from 'flarum/common/models/User';
 import Link from 'flarum/common/components/Link';
@@ -58,11 +58,13 @@ export default class TopPostersWidget extends Widget<WidgetAttrs> {
       <div className="FoF-TopPostersWidget-users">
         {users.map((user: User) => (
           <Link href={app.route('user', { username: user.slug() })} className="FoF-TopPostersWidget-users-item">
-            <div className="FoF-TopPostersWidget-users-item-avatar">{avatar(user)}</div>
+            <div className="FoF-TopPostersWidget-users-item-avatar">
+              <Avatar user={user} />
+            </div>
             <div className="FoF-TopPostersWidget-users-item-content">
               <div className="FoF-TopPostersWidget-users-item-name">{user.displayName()}</div>
               <div className="FoF-TopPostersWidget-users-item-value">
-                {icon('fas fa-comment-dots')} {this.monthlyCounts[user.id()!]}
+                <Icon name="fas fa-comment-dots" /> {this.monthlyCounts[user.id()!]}
               </div>
             </div>
           </Link>

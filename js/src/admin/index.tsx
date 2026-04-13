@@ -7,7 +7,7 @@ import Badge from 'flarum/common/components/Badge';
 app.initializers.add('fof/top-posters-widget', () => {
   registerWidget();
 
-  app.extensionData.for('fof-top-posters-widget').registerSetting(function (this: ExtensionPage) {
+  app.registry.for('fof-top-posters-widget').registerSetting(function (this: ExtensionPage) {
     const selected = this.setting('fof-top-posters-widget.excludeGroups', '[]');
     let selectedGroupIds: string[] = JSON.parse(selected());
 
