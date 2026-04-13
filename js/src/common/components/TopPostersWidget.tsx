@@ -3,7 +3,7 @@ import type Mithril from 'mithril';
 import LoadingIndicator from 'flarum/common/components/LoadingIndicator';
 import Avatar from 'flarum/common/components/Avatar';
 import Icon from 'flarum/common/components/Icon';
-import Widget, { WidgetAttrs } from 'flarum/extensions/fof-forum-widgets-core/common/components/Widget';
+import Widget, { WidgetAttrs } from 'ext:fof/forum-widgets-core/common/components/Widget';
 import type User from 'flarum/common/models/User';
 import Link from 'flarum/common/components/Link';
 import extractText from 'flarum/common/utils/extractText';

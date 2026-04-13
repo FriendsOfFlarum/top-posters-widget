@@ -25,8 +25,6 @@ class AddTopPostersToApi
             $data[$id] = pretty_number_format($count);
         }
 
-        return [
-            'fof-top-posters-widget.topPosterCounts' => $data,
-        ];
+        return $data;
     }
 }
