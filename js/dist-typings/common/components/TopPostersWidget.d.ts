@@ -1,5 +1,5 @@
 import type Mithril from 'mithril';
-import Widget, { WidgetAttrs } from 'flarum/extensions/fof-forum-widgets-core/common/components/Widget';
+import Widget, { WidgetAttrs } from 'ext:fof/forum-widgets-core/common/components/Widget';
 import type User from 'flarum/common/models/User';
 export default class TopPostersWidget extends Widget<WidgetAttrs> {
     private monthlyCounts;
