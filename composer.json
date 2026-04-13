@@ -2,7 +2,10 @@
     "name": "fof/top-posters-widget",
     "description": "Top Posters Widget",
     "keywords": [
-        "flarum", "widget", "posters", "forum"
+        "flarum",
+        "widget",
+        "posters",
+        "forum"
     ],
     "funding": [
         {
@@ -22,11 +25,11 @@
         "afrux/top-posters-widget": "*"
     },
     "require": {
-        "flarum/core": "^1.8.0",
+        "flarum/core": "^2.0.0-beta",
         "fof/forum-widgets-core": "^1.0.0"
     },
     "require-dev": {
-        "flarum/phpstan": "*"
+        "flarum/phpstan": "^2.0.0-beta"
     },
     "authors": [
         {
