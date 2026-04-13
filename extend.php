@@ -11,13 +11,13 @@
 
 namespace FoF\TopPosters;
 
-use Flarum\Api\Serializer as FlarumSerializer;
-use Flarum\Api\Controller\ShowForumController;
+use Flarum\Api\Endpoint;
+use Flarum\Api\Resource\ForumResource;
 use Flarum\Extend;
 use Flarum\Settings\Event\Saved;
 use Flarum\User\Event\Saving as UserSaving;
-use Flarum\User\Filter\UserFilterer;
 use Flarum\User\Search\UserSearcher;
+use FoF\TopPosters\Api\ForumResourceFields;
 
 return [
     (new Extend\Frontend('forum'))
@@ -30,19 +30,10 @@ return [
 
     new Extend\Locales(__DIR__.'/locale'),
 
-    (new Extend\ApiSerializer(FlarumSerializer\ForumSerializer::class))
-        ->attributes(AddTopPostersToApi::class)
-        ->hasMany('topPosters', FlarumSerializer\UserSerializer::class),
-
-    (new Extend\ApiController(ShowForumController::class))
-        ->addInclude(['topPosters'])
-        ->prepareDataForSerialization(LoadForumTopPostersRelationship::class),
-
-    (new Extend\Filter(UserFilterer::class))
-        ->addFilter(Query\TopPosterGambitFilter::class),
-
-    (new Extend\SimpleFlarumSearch(UserSearcher::class))
-        ->addGambit(Query\TopPosterGambitFilter::class),
+    (new Extend\ApiResource(ForumResource::class))
+        ->fields(ForumResourceFields::class)
+        ->endpoint(Endpoint\Show::class, fn (Endpoint\Show $endpoint) => $endpoint
+            ->addDefaultInclude(['topPosters'])),
 
     (new Extend\Settings())
         ->default('fof-top-posters-widget.excludeGroups', '[]'),
@@ -50,4 +41,7 @@ return [
     (new Extend\Event())
         ->listen(Saved::class, Listener\ClearTopPosterCacheOnSettingsChange::class)
         ->listen(UserSaving::class, Listener\ClearTopPosterCacheOnSuspension::class),
+
+    (new Extend\SearchDriver(\Flarum\Search\Database\DatabaseSearchDriver::class))
+        ->addFilter(UserSearcher::class, Query\TopPosterFilter::class),
 ];

@@ -11,11 +11,9 @@
 
 namespace FoF\TopPosters;
 
-use Flarum\Api\Controller\ShowForumController;
+use Flarum\Api\Context;
 use Flarum\Settings\SettingsRepositoryInterface;
-use Flarum\Http\RequestUtil;
 use Flarum\User\User;
-use Psr\Http\Message\ServerRequestInterface;
 
 class LoadForumTopPostersRelationship
 {
@@ -24,21 +22,20 @@ class LoadForumTopPostersRelationship
         protected UserRepository $repository
     ) {}
 
-    public function __invoke(ShowForumController $controller, &$data, ServerRequestInterface $request): void
+    public function __invoke(mixed $model, Context $context): array
     {
         $loadWithInitialResponse = $this->settings->get('fof-forum-widgets-core.prefer_data_with_initial_load', false);
 
         if (! $loadWithInitialResponse) {
-            $data['topPosters'] = [];
-            return;
+            return [];
         }
 
-        $actor = RequestUtil::getActor($request);
         $counts = $this->repository->getTopPosters();
 
-        $data['topPosters'] = User::query()
-            ->whereVisibleTo($actor)
+        return User::query()
+            ->whereVisibleTo($context->getActor())
             ->whereIn('id', array_keys($counts))
-            ->get();
+            ->get()
+            ->all();
     }
 }
