@@ -18,6 +18,10 @@ use Flarum\Settings\Event\Saved;
 use Flarum\User\Event\Saving as UserSaving;
 use Flarum\User\Filter\UserFilterer;
 use Flarum\User\Search\UserSearcher;
+use Flarum\Api\Context;
+use Flarum\Api\Endpoint;
+use Flarum\Api\Resource;
+use Flarum\Api\Schema;
 
 return [
     (new Extend\Frontend('forum'))
@@ -30,10 +34,12 @@ return [
 
     new Extend\Locales(__DIR__.'/locale'),
 
+    // @TODO: Replace with the new implementation https://docs.flarum.org/2.x/extend/api#extending-api-resources
     (new Extend\ApiSerializer(FlarumSerializer\ForumSerializer::class))
         ->attributes(AddTopPostersToApi::class)
         ->hasMany('topPosters', FlarumSerializer\UserSerializer::class),
 
+    // @TODO: Replace with the new implementation https://docs.flarum.org/2.x/extend/api#extending-api-resources
     (new Extend\ApiController(ShowForumController::class))
         ->addInclude(['topPosters'])
         ->prepareDataForSerialization(LoadForumTopPostersRelationship::class),
