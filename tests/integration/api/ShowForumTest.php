@@ -50,7 +50,7 @@ class ShowForumTest extends TestCase
     #[Test]
     public function top_poster_counts_attribute_is_present()
     {
-        $response = $this->send($this->request('GET', '/api'));
+        $response = $this->send($this->request('GET', '/api', ['authenticatedAs' => 1]));
 
         $this->assertEquals(200, $response->getStatusCode());
 
@@ -62,24 +62,25 @@ class ShowForumTest extends TestCase
     #[Test]
     public function top_poster_counts_reflect_post_counts()
     {
-        $response = $this->send($this->request('GET', '/api'));
+        $response = $this->send($this->request('GET', '/api', ['authenticatedAs' => 1]));
 
         $this->assertEquals(200, $response->getStatusCode());
 
         $json = json_decode($response->getBody()->getContents(), true);
+        // JSON object keys are always strings after json_decode
         $counts = $json['data']['attributes']['fof-top-posters-widget.topPosterCounts'];
 
         // User 2 has 2 posts, user 3 has 1 post
-        $this->assertArrayHasKey(2, $counts);
-        $this->assertArrayHasKey(3, $counts);
-        $this->assertGreaterThan($counts[3], $counts[2]);
+        $this->assertArrayHasKey('2', $counts);
+        $this->assertArrayHasKey('3', $counts);
+        $this->assertGreaterThan($counts['3'], $counts['2']);
     }
 
     #[Test]
     public function top_posters_relationship_is_empty_by_default()
     {
         // prefer_data_with_initial_load defaults to false
-        $response = $this->send($this->request('GET', '/api'));
+        $response = $this->send($this->request('GET', '/api', ['authenticatedAs' => 1]));
 
         $this->assertEquals(200, $response->getStatusCode());
 
@@ -91,9 +92,9 @@ class ShowForumTest extends TestCase
     #[Test]
     public function top_posters_relationship_is_populated_when_setting_enabled()
     {
-        $this->setting('fof-forum-widgets-core.prefer_data_with_initial_load', true);
+        $this->setting('fof-forum-widgets-core.prefer_data_with_initial_load', '1');
 
-        $response = $this->send($this->request('GET', '/api'));
+        $response = $this->send($this->request('GET', '/api', ['authenticatedAs' => 1]));
 
         $this->assertEquals(200, $response->getStatusCode());
 
@@ -112,19 +113,21 @@ class ShowForumTest extends TestCase
     {
         $this->prepareDatabase([
             Post::class => [
+                // Extra old post for user 3 — should NOT be counted
                 ['id' => 4, 'discussion_id' => 1, 'user_id' => 3, 'type' => 'comment', 'content' => '<t><p>old</p></t>', 'created_at' => Carbon::now()->subMonths(2)],
             ],
         ]);
 
-        $response = $this->send($this->request('GET', '/api'));
+        $response = $this->send($this->request('GET', '/api', ['authenticatedAs' => 1]));
 
         $this->assertEquals(200, $response->getStatusCode());
 
         $json = json_decode($response->getBody()->getContents(), true);
         $counts = $json['data']['attributes']['fof-top-posters-widget.topPosterCounts'];
 
-        // Old post should not be counted; user 3 still only has 1 recent post
-        $this->assertEquals(1, $counts[3]);
+        // User 3 still only has 1 recent post (the old one is excluded)
+        $this->assertArrayHasKey('3', $counts);
+        $this->assertEquals(1, $counts['3']);
     }
 
     #[Test]
@@ -138,14 +141,14 @@ class ShowForumTest extends TestCase
 
         $this->setting('fof-top-posters-widget.excludeGroups', json_encode([Group::MODERATOR_ID]));
 
-        $response = $this->send($this->request('GET', '/api'));
+        $response = $this->send($this->request('GET', '/api', ['authenticatedAs' => 1]));
 
         $this->assertEquals(200, $response->getStatusCode());
 
         $json = json_decode($response->getBody()->getContents(), true);
         $counts = $json['data']['attributes']['fof-top-posters-widget.topPosterCounts'];
 
-        $this->assertArrayNotHasKey(2, $counts);
-        $this->assertArrayHasKey(3, $counts);
+        $this->assertArrayNotHasKey('2', $counts);
+        $this->assertArrayHasKey('3', $counts);
     }
 }

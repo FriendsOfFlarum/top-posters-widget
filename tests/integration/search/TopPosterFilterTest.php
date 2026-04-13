@@ -68,9 +68,10 @@ class TopPosterFilterTest extends TestCase
     #[Test]
     public function negated_filter_excludes_top_posters()
     {
+        // Negation is signalled by a leading '-' on the filter key, not the value
         $response = $this->send(
             $this->request('GET', '/api/users', ['authenticatedAs' => 1])
-                ->withQueryParams(['filter' => ['top_poster' => '-1']])
+                ->withQueryParams(['filter' => ['-top_poster' => '1']])
         );
 
         $this->assertEquals(200, $response->getStatusCode());
