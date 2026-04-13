@@ -44,16 +44,12 @@ return [
         ->addInclude(['topPosters'])
         ->prepareDataForSerialization(LoadForumTopPostersRelationship::class),
 
-    (new Extend\Filter(UserFilterer::class))
-        ->addFilter(Query\TopPosterGambitFilter::class),
-
-    (new Extend\SimpleFlarumSearch(UserSearcher::class))
-        ->addGambit(Query\TopPosterGambitFilter::class),
-
     (new Extend\Settings())
         ->default('fof-top-posters-widget.excludeGroups', '[]'),
 
     (new Extend\Event())
         ->listen(Saved::class, Listener\ClearTopPosterCacheOnSettingsChange::class)
         ->listen(UserSaving::class, Listener\ClearTopPosterCacheOnSuspension::class),
+    (new Extend\SearchDriver(\Flarum\Search\Database\DatabaseSearchDriver::class))
+        ->addFilter(UserSearcher::class, Query\TopPosterFilter::class),
 ];

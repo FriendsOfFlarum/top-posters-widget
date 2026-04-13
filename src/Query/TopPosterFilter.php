@@ -12,24 +12,17 @@
 namespace FoF\TopPosters\Query;
 
 use FoF\TopPosters\UserRepository;
-use Flarum\Filter\FilterInterface;
-use Flarum\Filter\FilterState;
-use Flarum\Search\AbstractRegexGambit;
+use Flarum\Search\Filter\FilterInterface;
 use Flarum\Search\SearchState;
 use Illuminate\Database\Query\Builder;
 
-class TopPosterGambitFilter extends AbstractRegexGambit implements FilterInterface
+class TopPosterFilter implements FilterInterface
 {
     public function __construct(private UserRepository $repository) {}
 
     public function apply(SearchState $search, $bit): bool
     {
         return parent::apply($search, $bit);
-    }
-
-    public function getGambitPattern(): string
-    {
-        return 'is:top_poster';
     }
 
     protected function conditions(SearchState $search, array $matches, $negate): void
@@ -42,16 +35,16 @@ class TopPosterGambitFilter extends AbstractRegexGambit implements FilterInterfa
         return 'top_poster';
     }
 
-    public function filter(FilterState $filterState, string $filterValue, bool $negate): void
+    public function filter(SearchState $state, array|string $value, bool $negate): void
     {
-        $this->constrain($filterState->getQuery(), $negate);
+        $this->constrain($state->getQuery(), $negate);
     }
 
-    protected function constrain(Builder $query, bool $negate = false): void
+    protected function constrain(\Illuminate\Database\Eloquent\Builder $query, bool $actor = false): void
     {
         $ids = array_keys($this->repository->getTopPosters());
 
-        if ($negate) {
+        if ($actor) {
             $query->whereNotIn('id', $ids);
         } else {
             $query->whereIn('id', $ids);

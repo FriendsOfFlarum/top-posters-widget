@@ -5,3 +5,7 @@ fof-top-posters-widget:
   forum:
     widget:
       title: Top Posters this Month
+  lib:
+    gambits:
+      top_poster:
+        key: top_poster

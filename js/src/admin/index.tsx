@@ -1,3 +1,4 @@
+export { default as extend } from './extend';
 import app from 'flarum/admin/app';
 import registerWidget from '../common/registerWidget';
 import ExtensionPage from 'flarum/admin/components/ExtensionPage';
