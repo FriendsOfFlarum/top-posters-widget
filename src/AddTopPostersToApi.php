@@ -11,8 +11,6 @@
 
 namespace FoF\TopPosters;
 
-use function FoF\ForumWidgets\Helper\pretty_number_format;
-
 class AddTopPostersToApi
 {
     public function __construct(private UserRepository $repository) {}
@@ -20,10 +18,6 @@ class AddTopPostersToApi
     public function __invoke(): array
     {
         $data = $this->repository->getTopPosters();
-
-        foreach ($data as $id => $count) {
-            $data[$id] = pretty_number_format($count);
-        }
 
         return [
             'fof-top-posters-widget.topPosterCounts' => $data,

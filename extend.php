@@ -15,9 +15,9 @@ use Flarum\Api\Serializer as FlarumSerializer;
 use Flarum\Api\Controller\ShowForumController;
 use Flarum\Extend;
 use Flarum\Settings\Event\Saved;
-use Flarum\User\Event\Saving as UserSaving;
 use Flarum\User\Filter\UserFilterer;
 use Flarum\User\Search\UserSearcher;
+use Illuminate\Console\Scheduling\Event;
 
 return [
     (new Extend\Frontend('forum'))
@@ -45,9 +45,21 @@ return [
         ->addGambit(Query\TopPosterGambitFilter::class),
 
     (new Extend\Settings())
-        ->default('fof-top-posters-widget.excludeGroups', '[]'),
+        ->default('fof-top-posters-widget.excludeGroups', '[]')
+        ->default('fof-top-posters-widget.timezone', 'UTC')
+        ->default('fof-top-posters-widget.excludePrivatePosts', true)
+        ->default('fof-top-posters-widget.calculation_mode', 'rolling_window')
+        ->default('fof-top-posters-widget.rolling_window_days', 30),
+
+    (new Extend\Routes('api'))
+        ->post('/top-posters/recalculate', 'fof.top-posters.recalculate', Api\Controller\RecalculateTopPostersController::class),
 
     (new Extend\Event())
-        ->listen(Saved::class, Listener\ClearTopPosterCacheOnSettingsChange::class)
-        ->listen(UserSaving::class, Listener\ClearTopPosterCacheOnSuspension::class),
+        ->listen(Saved::class, Listener\UpdateTopPostersOnSettingsChange::class),
+
+    (new Extend\Console())
+        ->command(Console\CalculateTopPostersCommand::class)
+        ->schedule('fof:top-posters:calculate', function (Event $event) {
+            $event->daily();
+        }),
 ];

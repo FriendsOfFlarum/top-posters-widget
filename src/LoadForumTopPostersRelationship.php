@@ -36,6 +36,11 @@ class LoadForumTopPostersRelationship
         $actor = RequestUtil::getActor($request);
         $counts = $this->repository->getTopPosters();
 
+        if (empty($counts)) {
+            $data['topPosters'] = [];
+            return;
+        }
+
         $data['topPosters'] = User::query()
             ->whereVisibleTo($actor)
             ->whereIn('id', array_keys($counts))
