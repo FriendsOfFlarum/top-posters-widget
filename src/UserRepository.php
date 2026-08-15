@@ -11,77 +11,58 @@
 
 namespace FoF\TopPosters;
 
-use FoF\ForumWidgets\SafeCacheRepositoryAdapter;
 use Carbon\Carbon;
-use Flarum\Extension\ExtensionManager;
-use Flarum\Post\CommentPost;
 use Flarum\Settings\SettingsRepositoryInterface;
-use Illuminate\Contracts\Cache\Repository as IlluminateCache;
+use Illuminate\Contracts\Cache\Repository as Cache;
 
 class UserRepository
 {
-    private const CACHE_KEY = 'fof-top-posters-widget.top_poster_counts';
+    /**
+     * @var Cache
+     */
+    protected $cache;
 
-    private ?array $memo = null;
+    /**
+     * @var SettingsRepositoryInterface
+     */
+    protected $settings;
 
-    public function __construct(
-        private SafeCacheRepositoryAdapter $cache,
-        private SettingsRepositoryInterface $settings,
-        private IlluminateCache $illuminateCache,
-        private ExtensionManager $extensions
-    ) {}
+    public function __construct(Cache $cache, SettingsRepositoryInterface $settings)
+    {
+        $this->cache = $cache;
+        $this->settings = $settings;
+    }
 
     public function getTopPosters(): array
     {
-        if ($this->memo !== null) {
-            return $this->memo;
-        }
+        $timezone = $this->settings->get('fof-top-posters-widget.timezone', 'UTC');
+        $now = Carbon::now($timezone);
+        $currentMonthKey = $now->format('Y-m');
+        $cacheKey = "fof-top-posters-widget.top_poster_counts.{$currentMonthKey}";
 
-        return $this->memo = $this->cache->remember(self::CACHE_KEY, 43200, function (): array {
-            $excludeGroups = $this->getExcludeGroups();
-
-            $query = CommentPost::query()
-                ->selectRaw('user_id, count(id) as count')
-                ->where('created_at', '>', Carbon::now()->subMonth())
-                ->groupBy('user_id')
-                ->orderBy('count', 'desc')
+        return $this->cache->rememberForever($cacheKey, function () use ($now, $currentMonthKey) {
+            $records = TopPosterHistory::query()
+                ->where('date_month', $currentMonthKey)
+                ->orderBy('post_count', 'desc')
                 ->limit(5)
-                ->toBase();
+                ->get();
 
-            if (!empty($excludeGroups)) {
-                $query->whereNotIn('user_id', function ($q) use ($excludeGroups) {
-                    $q->select('user_id')
-                        ->from('group_user')
-                        ->whereIn('group_id', $excludeGroups);
-                });
+            // Fall back to previous month if no data yet (early month transition)
+            if ($records->isEmpty()) {
+                $previousMonthKey = $now->copy()->subMonth()->format('Y-m');
+                $records = TopPosterHistory::query()
+                    ->where('date_month', $previousMonthKey)
+                    ->orderBy('post_count', 'desc')
+                    ->limit(5)
+                    ->get();
             }
 
-            if ($this->extensions->isEnabled('flarum-suspend')) {
-                $query->whereNotIn('user_id', function ($q) {
-                    $q->select('id')
-                        ->from('users')
-                        ->where('suspended_until', '>', Carbon::now());
-                });
+            $counts = [];
+            foreach ($records as $record) {
+                $counts[$record->user_id] = (int) $record->post_count;
             }
 
-            return $query->get()
-                ->sortByDesc('count')
-                ->mapWithKeys(function (\stdClass $post) {
-                    return [$post->user_id => (int) $post->count];
-                })
-                ->toArray();
+            return $counts;
         }) ?: [];
-    }
-
-    private function getExcludeGroups(): array
-    {
-        return array_map('intval', json_decode($this->settings->get('fof-top-posters-widget.excludeGroups'), true) ?? []);
-    }
-
-    public function clearTopPosterCache(): bool
-    {
-        $this->memo = null;
-
-        return $this->illuminateCache->forget(self::CACHE_KEY);
     }
 }

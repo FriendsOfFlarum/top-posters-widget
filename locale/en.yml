@@ -2,6 +2,23 @@ fof-top-posters-widget:
   admin:
     settings:
       info: Users of the selected groups will be excluded from the widget results.
+      calculation_settings_label: Calculation Settings
+      calculation_mode_label: Calculation Mode
+      exclusion_settings_label: Exclusion Settings
+      exclude_private: Exclude posts made in private discussions
+      mode_calendar: Calendar month
+      mode_rolling: Rolling window
+      rolling_days: Rolling window duration (days)
+    recalculate:
+      heading: Recalculate top poster history
+      description: Rebuild the stored rankings from post data using your current extension settings.
+      save_before_recalculate: Please ensure you have clicked "Save Changes" below before recalculating.
+      current: Recalculate this month
+      all: Recalculate all months
+      confirm_all: This will rebuild all stored top poster history. Continue?
+      success_current: Current month top posters recalculated.
+      success_all: All stored top poster history recalculated.
+      failed: Unable to recalculate top posters.
   forum:
     widget:
       title: Top Posters this Month
