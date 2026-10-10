@@ -3,6 +3,7 @@ import Widget, { WidgetAttrs } from 'ext:fof/forum-widgets-core/common/component
 import type User from 'flarum/common/models/User';
 export default class TopPostersWidget extends Widget<WidgetAttrs> {
     private monthlyCounts;
+    private rawMonthlyCounts;
     protected loadWithInitialResponse: boolean;
     oninit(vnode: Mithril.Vnode): void;
     oncreate(vnode: Mithril.Vnode): void;
