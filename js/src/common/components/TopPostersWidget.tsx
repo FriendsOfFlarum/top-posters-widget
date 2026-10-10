@@ -10,13 +10,15 @@ import extractText from 'flarum/common/utils/extractText';
 import type { ApiResponsePlural } from 'flarum/common/Store';
 
 export default class TopPostersWidget extends Widget<WidgetAttrs> {
-  private monthlyCounts!: Record<string, number>;
+  private monthlyCounts!: Record<string, string>;
+  private rawMonthlyCounts!: Record<string, number>;
   protected loadWithInitialResponse!: boolean;
 
   oninit(vnode: Mithril.Vnode): void {
     super.oninit(vnode);
 
     this.monthlyCounts = app.forum.attribute('fof-top-posters-widget.topPosterCounts');
+    this.rawMonthlyCounts = app.forum.attribute('fof-top-posters-widget.topPosterRawCounts') || {};
     this.loadWithInitialResponse = app.forum.attribute('fof-forum-widgets-core.preferDataWithInitialLoad');
     this.attrs.state.users ??= [];
     this.attrs.state.isLoading ??= true;
@@ -52,7 +54,13 @@ export default class TopPostersWidget extends Widget<WidgetAttrs> {
       return <LoadingIndicator />;
     }
 
-    const users = (this.attrs.state.users as User[]).sort((a: User, b: User) => this.monthlyCounts[b.id()!] - this.monthlyCounts[a.id()!]);
+    if (this.attrs.state.loadFailed) {
+      return <p className="FoF-TopPostersWidget-error">{app.translator.trans('fof-top-posters-widget.forum.widget.load_error')}</p>;
+    }
+
+    const users = (this.attrs.state.users as User[]).sort(
+      (a: User, b: User) => (this.rawMonthlyCounts[b.id()!] ?? 0) - (this.rawMonthlyCounts[a.id()!] ?? 0)
+    );
 
     return (
       <div className="FoF-TopPostersWidget-users">
@@ -81,10 +89,17 @@ export default class TopPostersWidget extends Widget<WidgetAttrs> {
     }
 
     this.attrs.state.isLoading = true;
+    this.attrs.state.loadFailed = false;
 
-    (app.store.find<User[]>('users', { filter: { top_poster: 'true' } }) as Promise<ApiResponsePlural<User>>).then((users) => {
-      this.setResults(users);
-    });
+    (app.store.find<User[]>('users', { filter: { top_poster: 'true' } }) as Promise<ApiResponsePlural<User>>).then(
+      (users) => this.setResults(users),
+      () => {
+        // `hasLoaded` stays false, so the next time the widget is shown it tries again.
+        this.attrs.state.isLoading = false;
+        this.attrs.state.loadFailed = true;
+        m.redraw();
+      }
+    );
   }
 
   setResults(users: User[]): void {
