@@ -5,6 +5,7 @@ fof-top-posters-widget:
   forum:
     widget:
       title: Top Posters this Month
+      load_error: Could not load the top posters.
   lib:
     gambits:
       top_poster:

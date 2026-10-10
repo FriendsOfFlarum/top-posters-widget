@@ -15,12 +15,14 @@ use Flarum\Api\Context;
 use Flarum\Api\Schema;
 use FoF\TopPosters\AddTopPostersToApi;
 use FoF\TopPosters\LoadForumTopPostersRelationship;
+use FoF\TopPosters\UserRepository;
 
 class ForumResourceFields
 {
     public function __construct(
         protected AddTopPostersToApi $addTopPosters,
         protected LoadForumTopPostersRelationship $loadTopPosters,
+        protected UserRepository $repository,
     ) {}
 
     public function __invoke(): array
@@ -28,6 +30,8 @@ class ForumResourceFields
         return [
             Schema\Arr::make('fof-top-posters-widget.topPosterCounts')
                 ->get(fn () => ($this->addTopPosters)()),
+            Schema\Arr::make('fof-top-posters-widget.topPosterRawCounts')
+                ->get(fn () => $this->repository->getTopPosters()),
             Schema\Relationship\ToMany::make('topPosters')
                 ->type('users')
                 ->includable()

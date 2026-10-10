@@ -77,6 +77,19 @@ class ShowForumTest extends TestCase
     }
 
     #[Test]
+    public function raw_top_poster_counts_are_unformatted_integers()
+    {
+        $response = $this->send($this->request('GET', '/api', ['authenticatedAs' => 1]));
+
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $json = json_decode($response->getBody()->getContents(), true);
+
+        // Unformatted, so the frontend can rank by them: "1.00K" cannot be compared as a number.
+        $this->assertSame(['2' => 2, '3' => 1], $json['data']['attributes']['fof-top-posters-widget.topPosterRawCounts']);
+    }
+
+    #[Test]
     public function top_posters_relationship_is_empty_by_default()
     {
         // prefer_data_with_initial_load defaults to false
